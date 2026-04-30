@@ -540,11 +540,16 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
   const settings = await self.allegedlyGet();
 
   // Pixel garden: opt-in. Random burst per close so the image builds in
-  // a reasonable session (avg ~54 pixels → ~80 tab closes to finish).
+  // a reasonable session (avg ~90 pixels → ~45 tab closes to finish).
+  // If the garden just completed, skip the tab-close whisper — garden wins.
   if (settings.enabled && settings.pixelGarden) {
-    addGardenPixels(30 + Math.floor(Math.random() * 50)).then((completed) => {
-      if (completed) openPopup("gardenDone");
-    }).catch(() => {});
+    addGardenPixels(60 + Math.floor(Math.random() * 60)).then((completed) => {
+      console.debug("[allegedly] garden batch done, completed:", completed);
+      if (completed) {
+        console.debug("[allegedly] garden complete — opening popup");
+        openPopup("gardenDone");
+      }
+    }).catch((e) => { console.debug("[allegedly] garden error:", e); });
   }
 
   // Use a domain-flavoured close line if the user opted in and we know the domain.
@@ -591,53 +596,12 @@ async function bootSession() {
     const [t] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
     if (t) await setActiveFromTab(t.id);
   } catch (_) {}
-  // TEST: if the garden is empty and there's art, fast-forward 40 pixels so
-  //       the campaign is already partially visible. Remove before publish.
-  await seedGardenForTesting(64 * 64);
-}
-
-async function seedGardenForTesting(count) {
-  let stored;
-  try { stored = await chrome.storage.local.get(GARDEN_KEY); }
-  catch (_) { return; }
-  const grid = decodeGardenRGBA(stored[GARDEN_KEY]);
-  // if anything is already painted, leave it alone
-  for (let i = 3; i < grid.length; i += 4) {
-    if (grid[i]) return;
-  }
-  // try to use real art if available, otherwise paint noise pixels directly
-  const files = await getArtFiles();
-  if (files.length > 0) {
-    await addGardenPixels(count);
-    return;
-  }
-  // fallback: paint count random pixels with the four tone colors so the
-  // canvas is visibly non-empty even before any PNG is added.
-  const COLORS = [
-    [154, 166, 160, 200],  // morning sage
-    [214, 210, 196, 200],  // day bone
-    [198, 154, 122, 200],  // evening clay
-    [ 90, 100, 120, 200],  // night slate
-  ];
-  let painted = 0;
-  for (let attempt = 0; painted < count && attempt < count * 8; attempt++) {
-    const idx = Math.floor(Math.random() * GARDEN_SIZE * GARDEN_SIZE);
-    const off = idx * 4;
-    if (grid[off + 3]) continue;
-    const c = COLORS[Math.floor(Math.random() * COLORS.length)];
-    grid[off] = c[0]; grid[off+1] = c[1]; grid[off+2] = c[2]; grid[off+3] = c[3];
-    painted++;
-  }
-  try { await chrome.storage.local.set({ [GARDEN_KEY]: encodeGardenRGBA(grid) }); }
-  catch (_) {}
 }
 
 chrome.runtime.onStartup && chrome.runtime.onStartup.addListener(bootSession);
 chrome.runtime.onInstalled.addListener(bootSession);
 // also boot on first script load (service worker wake-ups)
 bootSession();
-
-// Make sure the action icon never carries a stale notification.
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== "sync") return;
   if (changes.tabBadge || changes.enabled) clearActionBadge();

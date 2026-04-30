@@ -335,8 +335,8 @@ input[type="checkbox"]:checked { background: rgba(243, 243, 243, 0.85); }
   font-size: 11px;
   color: #b8b8b8;
   line-height: 1.4;
-  min-height: 14px;
 }
+.garden-caption.hidden { display: none; }
 
 /* ---------- inline "open garden" link inside settings ---------- */
 .row-extra {

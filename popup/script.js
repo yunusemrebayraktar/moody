@@ -102,6 +102,12 @@ function closeSoftly() {
   lineEl.textContent = line;
   requestAnimationFrame(() => lineEl.classList.add("show"));
 
+  // ---- gardenDone: jump straight to the garden view ----------------------
+  if (kind === "gardenDone") {
+    gardenOrigin = "main";
+    showGarden();
+  }
+
   // ---- whyHere mode -------------------------------------------------------
   // The input is theatre. Whatever the user types is never read or stored.
   const isWhyHere = kind === "whyHere";
@@ -244,6 +250,7 @@ function closeSoftly() {
       if (gardenBadge) gardenBadge.classList.remove("hidden");
       if (gardenCaption && self.allegedlyPick) {
         gardenCaption.textContent = self.allegedlyPick("gardenDone") || "";
+        gardenCaption.classList.remove("hidden");
       }
       if (gardenDownload) {
         gardenDownload.href = gardenCanvas.toDataURL("image/png");
@@ -251,7 +258,7 @@ function closeSoftly() {
       }
     } else {
       if (gardenBadge) gardenBadge.classList.add("hidden");
-      if (gardenCaption) gardenCaption.textContent = "";
+      if (gardenCaption) { gardenCaption.textContent = ""; gardenCaption.classList.add("hidden"); }
       if (gardenDownload) gardenDownload.classList.add("hidden");
     }
 
