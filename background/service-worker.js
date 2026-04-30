@@ -441,10 +441,15 @@ async function addGardenPixels(n) {
   }
 
   // Build list of unpainted opaque pixels (deterministic, no collision retries).
-  const unpainted = [];
+  // pixelsPerBatch scales with the image's opaque pixel count so that n tab
+  // closes always corresponds to roughly the same reveal fraction regardless
+  // of how many opaque pixels the source PNG has.
+  const totalOpaque = [];
   for (let i = 0; i < GARDEN_SIZE * GARDEN_SIZE; i++) {
-    if (art[i * 4 + 3] > 16 && grid[i * 4 + 3] === 0) unpainted.push(i);
+    if (art[i * 4 + 3] > 16) totalOpaque.push(i);
   }
+
+  const unpainted = totalOpaque.filter(i => grid[i * 4 + 3] === 0);
 
   // Fisher-Yates shuffle so revealed pixels are in random order.
   for (let i = unpainted.length - 1; i > 0; i--) {
@@ -452,7 +457,16 @@ async function addGardenPixels(n) {
     [unpainted[i], unpainted[j]] = [unpainted[j], unpainted[i]];
   }
 
-  const toPaint = unpainted.slice(0, n);
+  // Scale batch size to the image's opaque pixel count so the reveal pace is
+  // consistent regardless of PNG content density.
+  // Target: finish in ~40-60 tab closes → each batch = 1.7%–2.5% of opaque pixels.
+  const scaledN = Math.max(
+    20,
+    Math.round(totalOpaque.length * (0.017 + Math.random() * 0.008))
+  );
+  // Caller's n acts as a minimum so forced seeds still work.
+  const batchSize = Math.max(n, scaledN);
+  const toPaint = unpainted.slice(0, batchSize);
   for (const idx of toPaint) {
     const off = idx * 4;
     grid[off    ] = art[off    ];
@@ -464,7 +478,7 @@ async function addGardenPixels(n) {
   if (toPaint.length === 0) return;
 
   // Completion: no more unpainted opaque pixels left.
-  const completed = unpainted.length <= n; // painted everything in this batch
+  const completed = unpainted.length <= batchSize;
   const completedFile = completed ? campaign.file : null;
   if (completed) campaign = null;
   else campaign.painted = (campaign.painted || 0) + toPaint.length;

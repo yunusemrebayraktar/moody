@@ -81,6 +81,24 @@ function closeSoftly() {
   let line = "";
   let kind = "arrival";
   let autoOpened = false;
+  let gardenOrigin = "main";
+  let autoCloseTimer = null;
+  const GARDEN_SIZE = 64;
+  const GARDEN_KEY = "pixelGarden_rgba_v1";
+  const GARDEN_CAMPAIGN_KEY = "pixelGarden_campaign_v1";
+
+  // ---- garden completion check: highest priority -------------------------
+  // gardenJustCompleted is written to local storage by the service worker.
+  // Check it before anything else — if present, jump straight to garden
+  // regardless of how the popup was opened (race with tabClose whisper etc).
+  let jumpToGarden = false;
+  try {
+    const localData = await chrome.storage.local.get("gardenJustCompleted");
+    if (localData.gardenJustCompleted) {
+      jumpToGarden = true;
+      try { await chrome.storage.session.remove("lastEvent"); } catch (_) {}
+    }
+  } catch (_) {}
 
   try {
     const { lastEvent } = await chrome.storage.session.get("lastEvent");
@@ -103,7 +121,9 @@ function closeSoftly() {
   requestAnimationFrame(() => lineEl.classList.add("show"));
 
   // ---- gardenDone: jump straight to the garden view ----------------------
-  if (kind === "gardenDone") {
+  // jumpToGarden may have been set before gardenOrigin was declared above,
+  // so we do the actual navigation here after gardenOrigin exists.
+  if (jumpToGarden || kind === "gardenDone") {
     gardenOrigin = "main";
     showGarden();
   }
@@ -175,7 +195,6 @@ function closeSoftly() {
 
   // ---- auto-dismiss when triggered by an event ----------------------------
 
-  let autoCloseTimer = null;
   if (autoOpened && !isWhyHere) {
     autoCloseTimer = setTimeout(closeSoftly, AUTO_DISMISS_MS);
     // Any real keypress closes immediately so the user can keep typing.
@@ -200,10 +219,6 @@ function closeSoftly() {
 
   // ---- pixel garden -------------------------------------------------------
   // Hidden corner button opens the garden. No labels, no hover, no counts.
-
-  const GARDEN_SIZE = 64;
-  const GARDEN_KEY = "pixelGarden_rgba_v1";
-  const GARDEN_CAMPAIGN_KEY = "pixelGarden_campaign_v1";
 
   function decodeGardenRGBA(b64) {
     const out = new Uint8ClampedArray(GARDEN_SIZE * GARDEN_SIZE * 4);
@@ -289,8 +304,6 @@ function closeSoftly() {
     }
     gardenOrigin = "main";
   }
-
-  let gardenOrigin = "main";
 
   gardenTrigger.addEventListener("click", (e) => {
     e.stopPropagation();
