@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- primary view: a thought + nah -->
+    <main id="main" class="main">
+      <div class="brand-row">
+        <div class="brand">allegedly</div>
+        <div class="brand-tools">
+          <span id="tab-chip" class="tab-chip hidden" aria-label="open tabs">0</span>
+          <button
+            id="garden-trigger"
+            class="garden-trigger"
+            type="button"
+            title="garden"
+            aria-label="open garden"
+          ></button>
+        </div>
+      </div>
+      <p id="line" class="line">&nbsp;</p>
+      <!-- whyHere mode: input that goes nowhere -->
+      <input
+        id="why-input"
+        class="why-input hidden"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="why"
+      />
+      <div class="actions">
+        <button id="open-settings" class="link" type="button">settings</button>
+        <button id="nah" type="button" class="btn-primary">nah.</button>
+      </div>
+    </main>
+
+    <!-- secondary view: settings (hidden by default) -->
+    <section id="settings" class="settings hidden" aria-hidden="true">
+      <div class="brand">settings</div>
+      <div class="toggles" id="toggles">
+        <label class="row">
+          <span class="name">on</span>
+          <input type="checkbox" data-key="enabled" />
+        </label>
+        <div class="divider"></div>
+        <label class="row">
+          <span class="name">arrival whispers</span>
+          <input type="checkbox" data-key="arrival" />
+        </label>
+        <label class="row">
+          <span class="name">search whispers</span>
+          <input type="checkbox" data-key="search" />
+        </label>
+        <label class="row">
+          <span class="name">narrator</span>
+          <input type="checkbox" data-key="narrator" />
+        </label>
+        <label class="row">
+          <span class="name">tab close one-liners</span>
+          <input type="checkbox" data-key="tabClose" />
+        </label>
+        <label class="row">
+          <span class="name">idle cursor</span>
+          <input type="checkbox" data-key="idleCursor" />
+        </label>
+        <label class="row">
+          <span class="name">idle whispers</span>
+          <input type="checkbox" data-key="idle" />
+        </label>
+        <label class="row">
+          <span class="name">tab hoarder</span>
+          <input type="checkbox" data-key="tabHoarder" />
+        </label>
+        <label class="row">
+          <span class="name">late night</span>
+          <input type="checkbox" data-key="lateNight" />
+        </label>
+        <label class="row">
+          <span class="name">tab count chip</span>
+          <input type="checkbox" data-key="tabBadge" />
+        </label>
+        <label class="row">
+          <span class="name">oldest tab</span>
+          <input type="checkbox" data-key="oldestTab" />
+        </label>
+        <label class="row">
+          <span class="name">time on domain</span>
+          <input type="checkbox" data-key="timeOnDomain" />
+        </label>
+        <div class="divider"></div>
+        <label class="row">
+          <span class="name">why are you here</span>
+          <input type="checkbox" data-key="whyHere" />
+        </label>
+        <label class="row">
+          <span class="name">cursor echo</span>
+          <input type="checkbox" data-key="cursorEcho" />
+        </label>
+        <label class="row">
+          <span class="name">tab as personality</span>
+          <input type="checkbox" data-key="tabAsPersonality" />
+        </label>
+        <label class="row">
+          <span class="name">pixel garden</span>
+          <input type="checkbox" data-key="pixelGarden" />
+        </label>
+      </div>
+      <div class="help-foot">
+        <button id="open-help" class="link" type="button">what does this do</button>
+        <button id="close-settings" class="link" type="button">back</button>
+      </div>
+    </section>
+
+    <!-- help view: one quiet sentence per toggle. one voice. -->
+    <section id="help" class="help hidden" aria-hidden="true">
+      <div class="brand">what does this do</div>
+      <dl id="help-list"></dl>
+      <div class="help-foot">
+        <span></span>
+        <button id="close-help" class="link" type="button">back</button>
+      </div>
+    </section>
+
+    <!-- tertiary view: the garden. -->
+    <section id="garden" class="garden hidden" aria-hidden="true">
+      <div class="brand-row">
+        <div class="brand"><span class="accent">·</span> garden</div>
+        <span id="garden-badge" class="garden-badge hidden">finished</span>
+      </div>
+      <canvas id="garden-canvas" width="252" height="252"></canvas>
+      <div id="garden-caption" class="garden-caption"></div>
+      <div class="garden-foot">
+        <button id="garden-clear-bottom" class="link" type="button">clear</button>
+        <a id="garden-download" class="link garden-download hidden" download="garden.png">save</a>
+        <button id="garden-close" class="link" type="button">back</button>
+      </div>
+    </section>
+
+    <script src="../lib/lines.js"></script>
+    <script src="../lib/storage.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

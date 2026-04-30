@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "Allegedly",
+  "version": "0.1.0",
+  "description": "Allegedly does not track you. Allegedly does not improve productivity. Allegedly, it just has thoughts.",
+  "author": "yunusemrebayraktar",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Allegedly",
+    "default_popup": "popup/index.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "idle"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "exclude_matches": [
+        "*://chrome.google.com/*",
+        "*://chromewebstore.google.com/*"
+      ],
+      "js": ["lib/lines.js", "lib/storage.js", "content/detector.js", "content/idle-cursor.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*.png", "icons/*.svg", "garden-images/*.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

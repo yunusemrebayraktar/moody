@@ -1,0 +1,393 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 280px;
+  background: #0b0b0b;
+  color: #f3f3f3;
+  font: 400 14px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.01em;
+  overflow: hidden;
+  /* themed scrollbars (firefox + webkit) so they match the dark popup. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-soft) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--accent-soft);
+  border-radius: 3px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+*::-webkit-scrollbar-corner { background: transparent; }
+
+:root {
+  /* a quiet warm accent. used on hover, focus, dividers, the garden. */
+  --accent: #d6a585;
+  --accent-soft: rgba(214, 165, 133, 0.36);
+  --accent-faint: rgba(214, 165, 133, 0.14);
+}
+
+/* Soft close: body fades for ~120ms before window.close, so the popup never
+   ends mid-transition with a visible sliver. */
+body {
+  opacity: 1;
+  transition: opacity 120ms ease;
+}
+body.fading {
+  opacity: 0;
+}
+
+.brand {
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #c8c8c8;
+  margin-bottom: 14px;
+  user-select: none;
+}
+
+/* in the main view, brand sits in a row with the tab chip + garden trigger on the right. */
+.brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--accent-faint);
+}
+.brand-row .brand {
+  margin-bottom: 0;
+}
+.brand-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* tab count chip — quiet, color-coded. lives in the popup, never on the icon. */
+.tab-chip {
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #f3f3f3;
+  background: transparent;
+  border: 1px solid var(--chip-color, var(--accent-soft));
+  border-radius: 3px;
+  padding: 1px 6px;
+  min-width: 18px;
+  text-align: center;
+  user-select: none;
+  opacity: 0.85;
+}
+.tab-chip[data-tone="green"]  { --chip-color: #4f8a5c; color: #c4e6cb; }
+.tab-chip[data-tone="yellow"] { --chip-color: #b89436; color: #ead7a4; }
+.tab-chip[data-tone="red"]    { --chip-color: #b85050; color: #f0c8c8; }
+.tab-chip.hidden { display: none; }
+
+/* ---------- primary view ---------- */
+
+.main {
+  padding: 18px 18px 14px;
+  text-align: left;
+  position: relative;
+}
+
+/* a faint asterisk in the bottom-right of the main view.
+   echoes the icon, gives the empty space a footnote anchor. */
+.main::after {
+  content: "∗";
+  position: absolute;
+  right: 14px;
+  bottom: 8px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.35;
+  pointer-events: none;
+  user-select: none;
+}
+}
+
+.line {
+  margin: 0 0 18px;
+  padding-left: 10px;
+  border-left: 2px solid var(--accent-soft);
+  font-size: 15px;
+  line-height: 1.55;
+  color: #ececec;
+  min-height: 1.5em;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 350ms ease, transform 350ms ease;
+}
+.line.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.btn-primary {
+  background: transparent;
+  color: #f3f3f3;
+  border: 1px solid var(--accent-soft);
+  padding: 9px 20px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 120ms ease, border-color 120ms ease, transform 80ms ease;
+}
+.btn-primary:hover { background: var(--accent-faint); border-color: var(--accent); }
+.btn-primary:active { transform: translateY(1px); }
+
+.link {
+  background: none;
+  border: none;
+  color: #888;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0;
+}
+.link:hover { color: var(--accent); }
+
+/* ---------- secondary view: settings ---------- */
+
+.settings {
+  width: 280px;
+  height: 420px;
+  box-sizing: border-box;
+  padding: 18px 18px 12px;
+  position: relative;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  display: flex;
+  flex-direction: column;
+}
+.settings.hidden { display: none; }
+
+.toggles {
+  margin-bottom: 14px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.row:hover { background: rgba(255, 255, 255, 0.04); }
+.row .name { color: #e3e3e3; font-size: 13px; }
+
+.divider {
+  height: 1px;
+  background: var(--accent-faint);
+  margin: 6px 0;
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 30px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  transition: background 150ms ease;
+  outline: none;
+}
+input[type="checkbox"]::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background: #d0d0d0;
+  border-radius: 50%;
+  transition: left 150ms ease, background 150ms ease;
+}
+input[type="checkbox"]:checked { background: rgba(243, 243, 243, 0.85); }
+ input[type="checkbox"]:checked::after { left: 16px; background: #0b0b0b; }
+ input[type="checkbox"]:focus-visible { box-shadow: 0 0 0 2px var(--accent-soft); }
+
+/* ---------- whyHere mode: an input that goes nowhere ---------- */
+
+.why-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  color: #f3f3f3;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 6px 2px 8px;
+  margin: 0 0 14px;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  caret-color: #f3f3f3;
+}
+.why-input:focus { border-bottom-color: rgba(255, 255, 255, 0.4); }
+.why-input.hidden { display: none; }
+
+/* ---------- pixel garden ---------- */
+
+/* the trigger lives in the brand row. small but visible, accent-tinted. */
+.garden-trigger {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin: 0;
+  background: var(--accent);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  outline: none;
+  opacity: 0.7;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.2) inset;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+.garden-trigger:hover {
+  opacity: 1;
+  transform: scale(1.12);
+}
+.garden-trigger:focus { outline: none; }
+
+.garden {
+  width: 280px;
+  background: #0b0b0b;
+  position: relative;
+  padding: 14px 14px 12px;
+  box-sizing: border-box;
+}
+.garden.hidden { display: none; }
+.garden .brand-row { margin-bottom: 10px; }
+.garden .brand .accent { color: var(--accent); }
+#garden-canvas {
+  display: block;
+  width: 252px;
+  height: 252px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #0b0b0b;
+  border: 1px solid var(--accent-soft);
+  border-radius: 2px;
+}
+.garden-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--accent-faint);
+}
+.garden-download {
+  color: var(--accent);
+  text-decoration: none;
+}
+.garden-download:hover { text-decoration: underline; }
+
+/* finished badge — sits in the brand row, right side */
+.garden .brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.garden-badge {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 2px;
+  background: rgba(120, 168, 120, 0.18);
+  color: #9ec79e;
+  border: 1px solid rgba(120, 168, 120, 0.4);
+}
+.garden-badge.hidden { display: none; }
+
+/* caption under the canvas — same voice as everything else */
+.garden-caption {
+  margin-top: 8px;
+  padding-left: 8px;
+  border-left: 2px solid var(--accent-soft);
+  font-size: 11px;
+  color: #b8b8b8;
+  line-height: 1.4;
+  min-height: 14px;
+}
+
+/* ---------- inline "open garden" link inside settings ---------- */
+.row-extra {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 4px 8px;
+  gap: 12px;
+}
+.row-extra .link { font-size: 9px; }
+
+/* ---------- help view ---------- */
+.help {
+  width: 280px;
+  height: 420px;
+  box-sizing: border-box;
+  padding: 18px 18px 14px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  display: flex;
+  flex-direction: column;
+}
+.help.hidden { display: none; }
+.help dl {
+  margin: 0 0 12px;
+  padding: 0;
+}
+.help dt {
+  color: #f3f3f3;
+  font-size: 12px;
+  margin-top: 12px;
+  padding-left: 8px;
+  border-left: 2px solid var(--accent-soft);
+  letter-spacing: 0.02em;
+}
+.help dt:first-child { margin-top: 0; }
+.help dd {
+  margin: 4px 0 0 10px;
+  color: #9a9a9a;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.help .divider { margin: 10px 0 6px; }
+.help-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--accent-faint);
+}
+
+/* hidden helper used across views */
+.hidden { display: none !important; }
